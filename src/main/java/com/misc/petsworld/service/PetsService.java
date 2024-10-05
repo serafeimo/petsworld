@@ -1,18 +1,20 @@
 package com.misc.petsworld.service;
 
+import com.example.client.api.PetApi;
+import com.example.client.model.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class PetsService {
 
     @Autowired
-    RestTemplate restTemplate;
+    private PetApi petApi;
 
-    public String getPetsByStatus(String status) {
-        String findByStatusUrl = "https://petstore.swagger.io/v2/pet/findByStatus?status=" + status;
-
-        return restTemplate.getForObject(findByStatusUrl, String.class);
+    public List<Pet> getPet(String status) {
+        return petApi.findPetsByStatus(Arrays.asList(status));
     }
 }
