@@ -33,6 +33,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+// Download the Swagger json file
 task downloadSwaggerSpec {
 	doLast {
 		def swaggerUrl = new URL("https://petstore.swagger.io/v2/swagger.json")
@@ -42,6 +43,7 @@ task downloadSwaggerSpec {
 	}
 }
 
+// Configure the auto generation based on the of the Swagger json file
 openApiGenerate {
 	generatorName = "java"
 	inputSpec = "${buildDir}/swagger/swagger.json" // Use the downloaded file
@@ -53,8 +55,28 @@ openApiGenerate {
 	]
 }
 
+// Log the successful run of the automatic generation of code
+tasks.register("compileGeneratedCode") {
+	dependsOn tasks.named("openApiGenerate")
+	doLast {
+		println "Generated code compiled successfully."
+	}
+}
+
 // Make openApiGenerate dependent on downloadSwaggerSpec
-tasks.openApiGenerate.dependsOn downloadSwaggerSpec
+tasks.named("openApiGenerate") {
+	dependsOn downloadSwaggerSpec
+}
+
+// Make sure compileJava depends on the code generation.
+tasks.named("compileJava") {
+	dependsOn tasks.named("openApiGenerate")
+}
+
+// Make openApiGenerate part of the build process
+tasks.build {
+	dependsOn tasks.named("openApiGenerate")
+}
 
 sourceSets {
 	main {
