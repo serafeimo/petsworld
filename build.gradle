@@ -1,11 +1,7 @@
-import org.apache.commons.io.FileUtils
-import java.net.URL
-
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.4'
 	id 'io.spring.dependency-management' version '1.1.6'
-	id 'org.openapi.generator' version '7.0.0'
 }
 
 group = 'com.misc'
@@ -23,67 +19,10 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'commons-io:commons-io:2.8.0'
-
-	implementation 'javax.annotation:javax.annotation-api:1.3.2'
-	implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
-	implementation 'com.google.code.findbugs:jsr305:3.0.2'
+	implementation files('../petstoreclient/build/libs/petstore-api-client-1.0.0.jar')
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-// Download the Swagger json file
-task downloadSwaggerSpec {
-	doLast {
-		def swaggerUrl = new URL("https://petstore.swagger.io/v2/swagger.json")
-		def outputFile = file("${buildDir}/swagger/swagger.json")
-		outputFile.parentFile.mkdirs() // Create directory if it doesn't exist
-		FileUtils.copyURLToFile(swaggerUrl, outputFile)
-	}
-}
-
-// Configure the auto generation based on the of the Swagger json file
-openApiGenerate {
-	generatorName = "java"
-	inputSpec = "${buildDir}/swagger/swagger.json" // Use the downloaded file
-	outputDir = "$buildDir/generated"
-	apiPackage = "com.example.client.api"
-	modelPackage = "com.example.client.model"
-	configOptions = [
-			library: "resttemplate"
-	]
-}
-
-// Log the successful run of the automatic generation of code
-tasks.register("compileGeneratedCode") {
-	dependsOn tasks.named("openApiGenerate")
-	doLast {
-		println "Generated code compiled successfully."
-	}
-}
-
-// Make openApiGenerate dependent on downloadSwaggerSpec
-tasks.named("openApiGenerate") {
-	dependsOn downloadSwaggerSpec
-}
-
-// Make sure compileJava depends on the code generation.
-tasks.named("compileJava") {
-	dependsOn tasks.named("openApiGenerate")
-}
-
-// Make openApiGenerate part of the build process
-tasks.build {
-	dependsOn tasks.named("openApiGenerate")
-}
-
-sourceSets {
-	main {
-		java {
-			srcDir "$buildDir/generated/src/main/java"
-		}
-	}
 }
 
 tasks.named('test') {
